@@ -1,0 +1,11 @@
+@model int
+@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    string Tab(string name) => action == name ? "active" : "";
+}
+<ul class="nav nav-pills rd-tabs mb-4">
+    <li class="nav-item"><a class="nav-link @Tab("Categories")" asp-action="Categories" asp-route-id="@Model"><i class="bi bi-tags"></i> Categories</a></li>
+    <li class="nav-item"><a class="nav-link @Tab("Enrolments")" asp-action="Enrolments" asp-route-id="@Model"><i class="bi bi-people"></i> Enrolments</a></li>
+    <li class="nav-item"><a class="nav-link @Tab("Results")" asp-action="Results" asp-route-id="@Model"><i class="bi bi-stopwatch"></i> Results</a></li>
+    <li class="nav-item"><a class="nav-link" asp-action="EditEvent" asp-route-id="@Model"><i class="bi bi-pencil"></i> Edit event</a></li>
+</ul>

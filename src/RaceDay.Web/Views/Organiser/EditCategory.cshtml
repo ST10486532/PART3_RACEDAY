@@ -1,0 +1,26 @@
+@model CategoryFormViewModel
+@{
+    ViewData["Title"] = "Edit category";
+    var eventName = ViewData["EventName"]?.ToString() ?? "this event";
+}
+<nav class="mb-3"><a asp-action="Categories" asp-route-id="@Model.EventId" class="rd-back"><i class="bi bi-arrow-left"></i> Back to categories</a></nav>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-7">
+        <div class="card rd-form-card">
+            <div class="card-body">
+                <h1 class="rd-page-title">Edit category</h1>
+                <p class="text-muted">For @eventName</p>
+                <form asp-action="EditCategory" method="post" novalidate>
+                    <partial name="_CategoryForm" model="Model" />
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check2"></i> Save changes</button>
+                        <a asp-action="Categories" asp-route-id="@Model.EventId" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

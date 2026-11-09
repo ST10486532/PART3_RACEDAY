@@ -1,0 +1,29 @@
+@model CategoryFormViewModel
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+<input type="hidden" name="EventId" value="@Model.EventId" />
+@if (Model.CategoryId.HasValue)
+{
+    <input type="hidden" name="CategoryId" value="@Model.CategoryId" />
+}
+<div class="row g-3">
+    <div class="col-md-6">
+        <label for="CategoryName" class="form-label">Category name</label>
+        <input id="CategoryName" name="CategoryName" value="@Model.CategoryName" class="form-control" placeholder="e.g. 10km, 21km, Under 20, Senior" />
+        <span asp-validation-for="CategoryName" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label for="DistanceKm" class="form-label">Distance (km) <small class="text-muted">&ndash; leave empty for an age group</small></label>
+        <input id="DistanceKm" name="DistanceKm" type="number" step="0.01" min="0.01" value="@(Model.DistanceKm?.ToString("0.##") ?? "")" class="form-control" placeholder="e.g. 10" />
+        <span asp-validation-for="DistanceKm" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label for="EntryFee" class="form-label">Entry fee (R)</label>
+        <input id="EntryFee" name="EntryFee" type="number" step="0.01" min="0" value="@Model.EntryFee.ToString("0.##")" class="form-control" />
+        <span asp-validation-for="EntryFee" class="text-danger"></span>
+    </div>
+    <div class="col-md-6">
+        <label for="MaxParticipants" class="form-label">Maximum participants</label>
+        <input id="MaxParticipants" name="MaxParticipants" type="number" min="1" value="@Model.MaxParticipants" class="form-control" />
+        <span asp-validation-for="MaxParticipants" class="text-danger"></span>
+    </div>
+</div>
