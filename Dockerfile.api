@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+# RaceDay API (src/RaceDay.Api) - used by docker-compose.yml
+
+# ---------- build stage ----------
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY src/RaceDay.Api/RaceDay.Api.csproj src/RaceDay.Api/
+RUN dotnet restore src/RaceDay.Api/RaceDay.Api.csproj
+
+COPY src/RaceDay.Api/ src/RaceDay.Api/
+RUN dotnet publish src/RaceDay.Api/RaceDay.Api.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+# ---------- runtime stage ----------
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+
+ENV ASPNETCORE_URLS=http://+:8080 \
+    ASPNETCORE_ENVIRONMENT=Production \
+    DOTNET_RUNNING_IN_CONTAINER=true
+
+COPY --from=build /app/publish .
+
+USER app
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "RaceDay.Api.dll"]
