@@ -1,0 +1,18 @@
+@{
+    var code = ViewData["Code"] is int c ? c : 404;
+    ViewData["Title"] = code == 404 ? "Page not found" : "Oops";
+}
+<div class="rd-empty text-center">
+    <i class="bi bi-signpost-split rd-empty-icon"></i>
+    @if (code == 404)
+    {
+        <h1 class="rd-page-title">Wrong turn!</h1>
+        <p class="lead">We could not find that page. It may have been moved or deleted.</p>
+    }
+    else
+    {
+        <h1 class="rd-page-title">Oops</h1>
+        <p class="lead">Something stopped that page from loading (error @code). Please try again.</p>
+    }
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Back to home</a>
+</div>

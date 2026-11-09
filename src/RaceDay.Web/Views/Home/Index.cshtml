@@ -1,0 +1,73 @@
+@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Upcoming events";
+    var isLoggedIn = User.Identity?.IsAuthenticated == true;
+}
+
+<section class="rd-hero">
+    <div class="rd-hero-inner">
+        <p class="rd-eyebrow">South Africa's road events</p>
+        <h1 class="rd-hero-title">Find your next <span>start line</span></h1>
+        <p class="rd-hero-text">Browse runs, walks and cycle tours, enter in seconds and track every result.</p>
+        @if (!isLoggedIn)
+        {
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Create a free account</a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">Log in</a>
+            </div>
+        }
+    </div>
+</section>
+
+<form method="get" class="rd-filter card" asp-controller="Home" asp-action="Index">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+            <label class="form-label" for="search">Search</label>
+            <input type="text" id="search" name="search" value="@Model.Search" class="form-control" placeholder="Event name" />
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label" for="type">Event type</label>
+            <select id="type" name="type" class="form-select">
+                <option value="" selected="@(string.IsNullOrEmpty(Model.Type))">All types</option>
+                <option value="Run" selected="@(Model.Type == "Run")">Run</option>
+                <option value="Walk" selected="@(Model.Type == "Walk")">Walk</option>
+                <option value="Cycle" selected="@(Model.Type == "Cycle")">Cycle</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <label class="form-label" for="location">Location</label>
+            <input type="text" id="location" name="location" value="@Model.Location" class="form-control" placeholder="e.g. Cape Town" />
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-funnel"></i> Filter</button>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+        </div>
+    </div>
+</form>
+
+<h2 class="rd-section-title">Upcoming events <small>@Model.Events.Count found</small></h2>
+
+@if (Model.LoadError != null)
+{
+    <div class="alert alert-warning">@Model.LoadError</div>
+}
+else if (Model.Events.Count == 0)
+{
+    <div class="rd-empty text-center">
+        <i class="bi bi-calendar-x rd-empty-icon"></i>
+        <h3>No events match your filters</h3>
+        <p>Try a different search, or clear the filters to see everything that is coming up.</p>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var ev in Model.Events)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <partial name="_EventCard" model="ev" />
+            </div>
+        }
+    </div>
+    <span>ST10486532 AUTHOR GIFT TSHWAANE</span>
+}

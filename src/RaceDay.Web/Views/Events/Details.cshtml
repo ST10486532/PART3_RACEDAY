@@ -1,0 +1,126 @@
+@model EventDetailsViewModel
+@{
+    var ev = Model.Event;
+    ViewData["Title"] = ev.EventName;
+    var isParticipant = User.IsInRole("Participant");
+    var isLoggedIn = User.Identity?.IsAuthenticated == true;
+    var hasPassed = ev.EventDate < DateOnly.FromDateTime(DateTime.Today);
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <a asp-controller="Home" asp-action="Index" class="rd-back"><i class="bi bi-arrow-left"></i> All events</a>
+</nav>
+
+<div class="rd-detail-banner">
+    @if (ev.HasBanner)
+    {
+        <img src="~/media/events/@ev.EventID" alt="Banner for @ev.EventName" />
+    }
+    else
+    {
+        <div class="rd-banner-placeholder rd-banner-large"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i></div>
+    }
+    <div class="rd-detail-banner-text">
+        <span class="rd-type-chip"><i class="bi @UiHelpers.TypeIcon(ev.EventType)"></i> @ev.EventType</span>
+        <h1 class="rd-page-title mb-0">@ev.EventName</h1>
+    </div>
+</div>
+
+<div class="row g-4 mt-1">
+    <div class="col-12 col-lg-4 order-lg-2">
+        <div class="card rd-fact-card">
+            <div class="card-body">
+                <h2 class="rd-card-heading">Event details</h2>
+                <ul class="rd-facts list-unstyled mb-0">
+                    <li><i class="bi bi-calendar-event"></i><div><small>Date</small>@UiHelpers.FormatDate(ev.EventDate)</div></li>
+                    <li><i class="bi bi-geo-alt"></i><div><small>Location</small>@ev.Location</div></li>
+                    <li><i class="bi bi-signpost-split"></i><div><small>Distance</small>@ev.DistanceKm.ToString("0.##") km</div></li>
+                    <li><i class="bi bi-person-badge"></i><div><small>Organised by</small>@ev.OrganiserName</div></li>
+                </ul>
+            </div>
+        </div>
+
+        @if (ev.Routes.Count > 0)
+        {
+            <div class="card rd-fact-card mt-3">
+                <div class="card-body">
+                    <h2 class="rd-card-heading">Route</h2>
+                    @foreach (var route in ev.Routes)
+                    {
+                        <div class="rd-route">
+                            <strong>@route.RouteName</strong>
+                            <span>@route.DistanceKm.ToString("0.##") km@(route.ElevationGainM.HasValue ? $" · {route.ElevationGainM.Value:0} m climb" : "")</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="col-12 col-lg-8 order-lg-1">
+        @if (!string.IsNullOrWhiteSpace(ev.Description))
+        {
+            <h2 class="rd-section-title">About this event</h2>
+            <p class="rd-description">@ev.Description</p>
+        }
+
+        <h2 class="rd-section-title">Categories</h2>
+
+        @if (Model.MyEnrolment != null)
+        {
+            <div class="alert alert-success d-flex flex-wrap align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>You are enrolled in <strong>@Model.MyEnrolment.CategoryName</strong></span>
+                <partial name="_StatusBadge" model="@Model.MyEnrolment.Status" />
+                <a asp-controller="Participant" asp-action="MyEnrolments" class="ms-auto">Manage in My enrolments</a>
+            </div>
+        }
+        else if (hasPassed)
+        {
+            <div class="alert alert-secondary">This event has already taken place, so enrolment is closed.</div>
+        }
+        else if (!isLoggedIn)
+        {
+            <div class="alert alert-info d-flex flex-wrap align-items-center gap-2">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>Log in as a participant to enrol in this event.</span>
+                <a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@Url.Action("Details", "Events", new { id = ev.EventID })" class="btn btn-primary btn-sm ms-auto">Log in</a>
+            </div>
+        }
+
+        @if (ev.Categories.Count == 0)
+        {
+            <div class="rd-empty"><p class="mb-0">The organiser has not added any categories yet. Check back soon.</p></div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var category in ev.Categories.OrderBy(c => c.DistanceKm ?? decimal.MaxValue).ThenBy(c => c.CategoryName))
+                {
+                    <div class="col-12 col-md-6">
+                        <div class="card rd-category-card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h3 class="rd-card-title mb-1">@category.CategoryName</h3>
+                                    <span class="rd-price">@UiHelpers.Money(category.EntryFee)</span>
+                                </div>
+                                <p class="text-muted mb-3">
+                                    <i class="bi bi-signpost-split"></i> @UiHelpers.Distance(category.DistanceKm)
+                                    &middot; <i class="bi bi-people"></i> up to @category.MaxParticipants
+                                </p>
+                                @if (isParticipant && Model.MyEnrolment == null && !hasPassed)
+                                {
+                                    <form asp-controller="Participant" asp-action="Enrol" method="post" class="mt-auto">
+                                        <input type="hidden" name="categoryId" value="@category.CategoryID" />
+                                        <input type="hidden" name="eventId" value="@ev.EventID" />
+                                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-flag-fill"></i> Enrol in this category</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
