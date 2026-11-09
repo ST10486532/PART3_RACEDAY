@@ -1,0 +1,80 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create your account";
+}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-9 col-lg-6">
+        <div class="card rd-form-card">
+            <div class="card-body">
+                <h1 class="rd-page-title">Join RaceDay</h1>
+                <p class="text-muted">Create an account in under a minute.</p>
+
+                <form asp-action="Register" method="post" novalidate>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label d-block">I am joining as</label>
+                        <div class="btn-group w-100" role="group" aria-label="Account type">
+                            <input type="radio" class="btn-check" name="Role" id="roleParticipant" value="Participant" checked="@(Model.Role != "Organiser")" />
+                            <label class="btn btn-outline-primary" for="roleParticipant"><i class="bi bi-lightning-charge"></i> Participant<br /><small>I want to enter events</small></label>
+                            <input type="radio" class="btn-check" name="Role" id="roleOrganiser" value="Organiser" checked="@(Model.Role == "Organiser")" />
+                            <label class="btn btn-outline-primary" for="roleOrganiser"><i class="bi bi-clipboard-check"></i> Organiser<br /><small>I run events</small></label>
+                        </div>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3" id="organiserCodeGroup">
+                        <label asp-for="OrganiserCode" class="form-label"></label>
+                        <input asp-for="OrganiserCode" class="form-control" autocomplete="off" />
+                        <div class="form-text">Organisers need an invite code from RaceDay. Participants can skip this.</div>
+                        <span asp-validation-for="OrganiserCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FullName" class="form-label"></label>
+                        <input asp-for="FullName" class="form-control" autocomplete="name" />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email address</label>
+                        <input asp-for="Email" class="form-control" autocomplete="email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label asp-for="Password" class="form-label"></label>
+                            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ConfirmPassword" class="form-label"></label>
+                            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Create account</button>
+                </form>
+                <p class="text-center mt-4 mb-0">Already have an account? <a asp-action="Login">Log in</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Only organisers need an invite code, so hide the box for participants.
+        (function () {
+            var group = document.getElementById('organiserCodeGroup');
+            var radios = document.querySelectorAll('input[name="Role"]');
+            function update() {
+                var organiser = document.getElementById('roleOrganiser').checked;
+                group.style.display = organiser ? '' : 'none';
+            }
+            radios.forEach(function (r) { r.addEventListener('change', update); });
+            update();
+        })();
+    </script>
+}
+//ST10486532
+//Author: Gift Tshwaane
