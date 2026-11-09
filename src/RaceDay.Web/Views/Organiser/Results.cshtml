@@ -1,0 +1,95 @@
+@model ResultsPageViewModel
+@{
+    var ev = Model.Event;
+    ViewData["Title"] = $"Results - {ev.EventName}";
+    var locked = !Model.EventHasHappened;
+}
+<nav class="mb-3"><a asp-action="Events" class="rd-back"><i class="bi bi-arrow-left"></i> My events</a></nav>
+
+<div class="rd-page-head">
+    <p class="rd-eyebrow mb-1">@UiHelpers.FormatDate(ev.EventDate) &middot; @ev.Location</p>
+    <h1 class="rd-page-title">Results for @ev.EventName</h1>
+</div>
+<partial name="_EventTabs" model="@ev.EventID" />
+
+@if (locked)
+{
+    <div class="alert alert-warning"><i class="bi bi-hourglass-split"></i> This event has not taken place yet. Results can be captured once the event date has arrived.</div>
+}
+else
+{
+    <p class="text-muted">Enter each participant's finish time and finishing position, then save. A saved result is published straight away on that participant's <strong>My results</strong> page.</p>
+}
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="rd-empty text-center">
+        <i class="bi bi-stopwatch rd-empty-icon"></i>
+        <h3>No confirmed participants</h3>
+        <p>Results can only be entered for participants with a confirmed enrolment.</p>
+    </div>
+}
+else
+{
+    <div class="card rd-table-card">
+        <div class="table-responsive">
+            <table class="table rd-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Participant</th>
+                        <th>Category</th>
+                        <th>Finish time</th>
+                        <th>Overall position</th>
+                        <th>Category position</th>
+                        <th>Outcome</th>
+                        <th class="text-end">Publish</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        var r = row.Result;
+                        var formId = $"result-form-{row.Enrolment.EnrolmentID}";
+                        <tr id="row-@row.Enrolment.EnrolmentID">
+                            <td class="fw-semibold">
+                                @row.Enrolment.ParticipantName
+                                @if (r != null) { <span class="status-badge status-confirmed ms-1">Published</span> }
+                            </td>
+                            <td>@row.Enrolment.CategoryName</td>
+                            <td>
+                                <input form="@formId" name="FinishTime" class="form-control form-control-sm rd-input-time" placeholder="hh:mm:ss"
+                                       value="@(r?.FinishTime?.ToString("HH:mm:ss") ?? "")" disabled="@locked" />
+                            </td>
+                            <td>
+                                <input form="@formId" name="OverallPosition" type="number" min="1" class="form-control form-control-sm rd-input-num"
+                                       value="@(r?.OverallPosition?.ToString() ?? "")" disabled="@locked" />
+                            </td>
+                            <td>
+                                <input form="@formId" name="CategoryPosition" type="number" min="1" class="form-control form-control-sm rd-input-num"
+                                       value="@(r?.CategoryPosition?.ToString() ?? "")" disabled="@locked" />
+                            </td>
+                            <td>
+                                <select form="@formId" name="Status" class="form-select form-select-sm" disabled="@locked">
+                                    <option value="Finished" selected="@(r == null || r.Status == "Finished")">Finished</option>
+                                    <option value="DNF" selected="@(r?.Status == "DNF")">DNF</option>
+                                    <option value="DQ" selected="@(r?.Status == "DQ")">DQ</option>
+                                </select>
+                            </td>
+                            <td class="text-end">
+                                <form id="@formId" asp-action="SaveResult" method="post">
+                                    <input type="hidden" name="EventId" value="@ev.EventID" />
+                                    <input type="hidden" name="EnrolmentId" value="@row.Enrolment.EnrolmentID" />
+                                    @if (r != null)
+                                    {
+                                        <input type="hidden" name="ResultId" value="@r.ResultID" />
+                                    }
+                                    <button type="submit" class="btn btn-primary btn-sm" disabled="@locked"><i class="bi bi-cloud-arrow-up"></i> @(r == null ? "Save & publish" : "Update")</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
