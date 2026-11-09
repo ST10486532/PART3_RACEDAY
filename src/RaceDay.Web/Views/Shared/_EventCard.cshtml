@@ -1,0 +1,23 @@
+@model EventDto
+<div class="card rd-event-card h-100">
+    <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventID" class="rd-event-banner" aria-label="View @Model.EventName">
+        @if (Model.HasBanner)
+        {
+            <img src="~/media/events/@Model.EventID" alt="Banner for @Model.EventName" loading="lazy" />
+        }
+        else
+        {
+            <div class="rd-banner-placeholder"><i class="bi @UiHelpers.TypeIcon(Model.EventType)"></i></div>
+        }
+        <span class="rd-type-chip"><i class="bi @UiHelpers.TypeIcon(Model.EventType)"></i> @Model.EventType</span>
+    </a>
+    <div class="card-body d-flex flex-column">
+        <div class="rd-date-line"><i class="bi bi-calendar-event"></i> @UiHelpers.FormatDate(Model.EventDate)</div>
+        <h3 class="rd-card-title"><a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventID">@Model.EventName</a></h3>
+        <ul class="rd-meta list-unstyled mb-3">
+            <li><i class="bi bi-geo-alt"></i> @Model.Location</li>
+            <li><i class="bi bi-signpost-split"></i> @Model.DistanceKm.ToString("0.##") km</li>
+        </ul>
+        <a asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventID" class="btn btn-primary mt-auto">View event &amp; enrol</a>
+    </div>
+</div>
