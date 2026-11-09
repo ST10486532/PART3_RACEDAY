@@ -1,0 +1,64 @@
+@model MyResultsViewModel
+@{
+    ViewData["Title"] = "My results";
+    var finished = Model.Results.Count(r => r.Status == "Finished");
+}
+<div class="mb-3">
+    <p class="rd-eyebrow mb-1">Race history</p>
+    <h1 class="rd-page-title mb-0">My results</h1>
+</div>
+
+@if (Model.Results.Count == 0)
+{
+    <div class="rd-empty text-center">
+        <i class="bi bi-trophy rd-empty-icon"></i>
+        <h3>No results yet</h3>
+        <p>Once an organiser publishes the results of an event you entered, your race history will appear here.</p>
+        <a asp-controller="Participant" asp-action="MyEnrolments" class="btn btn-primary">View my enrolments</a>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3"><div class="rd-stat"><span class="rd-stat-number">@Model.Results.Count</span><span class="rd-stat-label">Races</span></div></div>
+        <div class="col-6 col-md-3"><div class="rd-stat"><span class="rd-stat-number">@finished</span><span class="rd-stat-label">Finished</span></div></div>
+    </div>
+
+    <div class="card rd-table-card">
+        <div class="table-responsive">
+            <table class="table rd-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Finish time</th>
+                        <th>Finishing position</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Results)
+                    {
+                        <tr>
+                            <td><a asp-controller="Events" asp-action="Details" asp-route-id="@r.EventID" class="rd-link-strong">@r.EventName</a></td>
+                            <td>@UiHelpers.FormatDate(r.EventDate)</td>
+                            <td>@r.CategoryName</td>
+                            <td class="rd-mono">@UiHelpers.FormatTime(r.FinishTime)</td>
+                            <td>
+                                @if (r.Status == "Finished" && r.OverallPosition.HasValue)
+                                {
+                                    <span class="rd-position">@UiHelpers.Ordinal(r.OverallPosition.Value)</span>
+                                    <span class="text-muted">out of @r.TotalFinishers finishers</span>
+                                }
+                                else
+                                {
+                                    <partial name="_StatusBadge" model="@r.Status" />
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

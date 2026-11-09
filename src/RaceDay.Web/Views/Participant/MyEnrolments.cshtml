@@ -1,0 +1,72 @@
+@model MyEnrolmentsViewModel
+@{
+    ViewData["Title"] = "My enrolments";
+}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="rd-page-title mb-0">My enrolments</h1>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary"><i class="bi bi-search"></i> Find events</a>
+</div>
+
+@if (Model.Rows.Count == 0)
+{
+    <div class="rd-empty text-center">
+        <i class="bi bi-ticket-perforated rd-empty-icon"></i>
+        <h3>You have not entered any events yet</h3>
+        <p>Pick an event, choose a category and you will see it here straight away.</p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Browse events</a>
+    </div>
+}
+else
+{
+    <div class="card rd-table-card">
+        <div class="table-responsive">
+            <table class="table rd-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Enrolment</th>
+                        <th>Race status</th>
+                        <th class="text-end"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var row in Model.Rows)
+                    {
+                        var e = row.Enrolment;
+                        <tr>
+                            <td><a asp-controller="Events" asp-action="Details" asp-route-id="@e.EventID" class="rd-link-strong">@e.EventName</a></td>
+                            <td>@UiHelpers.FormatDate(e.EventDate)</td>
+                            <td>@e.CategoryName</td>
+                            <td><partial name="_StatusBadge" model="@e.Status" /></td>
+                            <td>
+                                @if (e.Status == "Cancelled")
+                                {
+                                    <span class="text-muted">&mdash;</span>
+                                }
+                                else
+                                {
+                                    <partial name="_StatusBadge" model="@row.RaceStatus" />
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (row.CanCancel)
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@e.EnrolmentID" method="post" class="d-inline"
+                                          onsubmit="return confirm('Cancel this enrolment?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
+                                    </form>
+                                }
+                                else if (row.RaceStatus == "Result available")
+                                {
+                                    <a asp-action="MyResults" class="btn btn-sm btn-outline-secondary">See result</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
